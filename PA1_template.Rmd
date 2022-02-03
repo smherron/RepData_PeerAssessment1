@@ -1,25 +1,211 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
+author: Suzannah Herron
 output: 
   html_document:
     keep_md: true
 ---
 
+## Data Overview
 
-## Loading and preprocessing the data
+*Activity Monitoring Dataset* with:  
+- **steps**: Number of steps taken in a 5-min interval (missing values coded as `NA`)  
+- **date**: Date in YYYY-MM-DD format\
+- **interval**: Identifier for the 5-min interval in which measurement was taken
+
+## 1. Loading and preprocessing the data
+
+```{r loading, message=FALSE}
+file_name <- "activity.zip"
+if (!file.exists(file_name)) {
+    url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+    download.file(url, file_name, method = "curl")  
+}
+
+if (!file.exists("activity.csv")) {
+    unquip(file_name)
+}
+
+activity <- read.csv("activity.csv")
+```
+Change `date` column from characters strings.
+```{r message=TRUE}
+library(lubridate)
+activity$date <- ymd(activity$date)
+summary(activity)
+```
+There are 2304 `NA` values
+
+## 2. What is mean total number of steps taken per day?
+
+Removing NA values
+```{r}
+act_na <- activity[!is.na(activity$steps), ]
+summary(act_na)
+```
+\newpage
+
+### 2.1 Calculate total number of steps taken per day
+
+```{r}
+act_sum <- aggregate(steps ~ date, act_na, sum)
+head(act_sum)
+```
+```{r message=FALSE}
+library(ggplot2)
+```
+
+### 2.2 Graph of Sum of Steps Taken Per Day
+
+
+```{r}
+ggplot(data = act_sum) +
+  geom_histogram(mapping = aes(steps), fill = "violetred", bins = 7, color = "black") +
+  labs(title = "Total Steps Taken Per Day",
+       x = "Total Steps",
+       y = "Number of Days")
+```
+\newpage
+
+### 2.3 Calculate average number of steps taken per day
+
+```{r}
+act_mean <- mean(act_sum$steps)
+act_med <- median(act_sum$steps)
+act_mean
+act_med
+```
+The mean of total steps per day is `r act_mean` and the median is `r act_med`.
+
+\newpage
+
+## 3. What is the average daily activity pattern?
+
+### 3.1 Make a time series plot of 5-min interval and avg num of steps taken averaged across all days
+
+Calculate mean of steps across intervals
+```{r}
+int_avg <- aggregate(steps ~ interval, act_na, mean)
+head(int_avg)
+```
+```{r}
+ggplot(data = int_avg) +
+  geom_line(mapping = aes(x = interval, y = steps), color = "purple") +
+  labs(title = "Avg. Steps Per 5-Min Interval",
+       x = "5-Min Interval",
+       y = "Avg. Steps")
+```
+
+### 3.2 Which 5-min interval has most steps?
+
+```{r}
+int_max <- int_avg[which.max(int_avg$steps), 1]
+int_max 
+```
+The 5-minute interval with the most steps is `r int_max`.
+
+
+## 4. Imputing missing values
+
+### 4.1 Calculate the total number of `NA`s
+
+```{r}
+sum(is.na(activity))
+```
+The total number of `NA`s in the dataset is 2304.\
+Alternatively, `summary()` will give you this info as well:
+```{r}
+summary(activity)
+```
+
+
+### 4.2 Devise strategy for filling in missing values and create new dataset
+
+Find mean of average of steps per interval.
+```{r}
+avg <- mean(int_avg$steps)
+avg
+```
+Create df with the `NA`s.
+```{r}
+nas <- is.na(activity$steps)
+```
+
+Insert `avg` into values with `NA`
+```{r}
+data_avg <- activity
+data_avg[nas, 1] <- avg
+head(data_avg)
+```
+Use new `data_avg` dataset to calculate sum of step per day
+```{r}
+data_sum <- aggregate(steps ~ date, data_avg, sum)
+head(data_sum)
+```
 
 
 
-## What is mean total number of steps taken per day?
+
+### 4.3 Make histogram of total number of steps taken each day. Report mean and median. How does it differ?
+
+```{r}
+ggplot(data = data_sum) +
+  geom_histogram(mapping = aes(steps), fill = "black", bins = 7, color = "violetred") +
+  labs(title = "Total Steps Taken Per Day",
+       x = "Total Steps",
+       y = "Number of Days")
+```
+
+```{r}
+data_mean <- mean(data_sum$steps)
+data_med <- median(data_sum$steps)
+data_mean
+data_med
+```
+The mean without the `NA` values is `r act_mean` and with inserted averages, it is `r data_mean`. \
+The median without the `NA` values is `r act_med` and with inserted averages, it is `r data_med`.
+
+```{r}
+diff_mean <- act_mean - data_mean
+diff_med <- act_med - data_med
+diff_mean
+diff_med
+```
+There is no impact extracting the `NA`s to the mean and a very negligible difference of `r diff_med` to the median.
+
+## 5. Are there differences in activity patterns between weekdays and weekends?
+
+### 5.1 Using `data_sum`, create a new variable factor with two levels of "weekday" and "weekend".
 
 
 
-## What is the average daily activity pattern?
+```{r message=FALSE}
+library(dplyr)
+```
+Using `weekdays()` to find day of the week then changing "Saturday" and "Sunday" to "Weekend" and the rest to "Weekday".
+```{r}
+weekend <- mutate(data_avg, weekday = ifelse((weekdays(data_avg$date) == "Saturday" | weekdays(data_avg$date) == "Sunday"), "Weekend", "Weekday"))
+head(weekend)
+```
+### 5.2 Make a plot of weekends vs. weekdays
+
+```{r}
+ggplot(data = weekend) +
+  geom_line(mapping = aes(x = interval, y = steps), color = "purple") +
+  facet_wrap(~weekday) +
+  labs(title = "Weekday vs. Weekend",
+       x = "5-Min Interval",
+       y = "Avg. Steps")
+```
 
 
 
-## Imputing missing values
 
 
 
-## Are there differences in activity patterns between weekdays and weekends?
+
+
+
+
+
+
