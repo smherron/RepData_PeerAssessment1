@@ -23,7 +23,7 @@ if (!file.exists(file_name)) {
 }
 
 if (!file.exists("activity.csv")) {
-    unquip(file_name)
+    unzip(file_name)
 }
 
 activity <- read.csv("activity.csv")
