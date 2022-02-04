@@ -1,3 +1,7 @@
+## The graphs are in the "graph_pngs" folder.
+
+
+
 ## Introduction
 
 It is now possible to collect a large amount of data about personal
