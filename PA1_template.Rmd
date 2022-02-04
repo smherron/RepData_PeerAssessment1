@@ -59,11 +59,13 @@ library(ggplot2)
 
 
 ```{r}
+png(filename = "total_steps_hist.png", width = 480, height = 480, bg = NA)
 ggplot(data = act_sum) +
   geom_histogram(mapping = aes(steps), fill = "violetred", bins = 7, color = "black") +
   labs(title = "Total Steps Taken Per Day",
        x = "Total Steps",
        y = "Number of Days")
+dev.off()
 ```
 \newpage
 
@@ -89,11 +91,13 @@ int_avg <- aggregate(steps ~ interval, act_na, mean)
 head(int_avg)
 ```
 ```{r}
+png(filename = "avg_intervals.png", width = 480, height = 480, bg = NA)
 ggplot(data = int_avg) +
   geom_line(mapping = aes(x = interval, y = steps), color = "purple") +
   labs(title = "Avg. Steps Per 5-Min Interval",
        x = "5-Min Interval",
        y = "Avg. Steps")
+dev.off()
 ```
 
 ### 3.2 Which 5-min interval has most steps?
@@ -149,11 +153,13 @@ head(data_sum)
 ### 4.3 Make histogram of total number of steps taken each day. Report mean and median. How does it differ?
 
 ```{r}
+png(filename = "total_per_day.png", width = 480, height = 480, bg = NA)
 ggplot(data = data_sum) +
   geom_histogram(mapping = aes(steps), fill = "black", bins = 7, color = "violetred") +
   labs(title = "Total Steps Taken Per Day",
        x = "Total Steps",
        y = "Number of Days")
+dev.off()
 ```
 
 ```{r}
@@ -190,12 +196,14 @@ head(weekend)
 ### 5.2 Make a plot of weekends vs. weekdays
 
 ```{r}
+png(filename = "weekend_intervals.png", width = 480, height = 480, bg = NA)
 ggplot(data = weekend) +
   geom_line(mapping = aes(x = interval, y = steps), color = "purple") +
   facet_wrap(~weekday) +
   labs(title = "Weekday vs. Weekend",
        x = "5-Min Interval",
        y = "Avg. Steps")
+dev.off()
 ```
 
 
