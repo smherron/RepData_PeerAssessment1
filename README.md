@@ -1,4 +1,4 @@
-## The graphs are in the "graph_pngs" folder.
+## The graphs are in the "graph_pngs" folder. The knitted pdf is also available.
 
 
 
